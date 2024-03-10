@@ -1,10 +1,12 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Xml.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.DevTools.V120.Browser;
+
 
 var Driver = new ChromeDriver();
 
@@ -27,11 +29,12 @@ void Main()
     if (input == "1")
     {
         string f_name=search_title();
+        string p_key=search_playkey();
+        Console.WriteLine(p_key);
         //
         //コード変更処理
         //
-        Console.WriteLine($"{f_name}");
-        output_txt(ref f_name);
+        output_txt(ref f_name,p_key);
 
         Console.WriteLine("\n書き込みが終了しました");
         Main();
@@ -68,7 +71,28 @@ string search_title()
     return "";
 }
 
-void output_txt(ref string File_name)
+
+string search_playkey()
+{
+    var result = Driver.FindElements(By.XPath(@"//*[@class='box2']"));
+
+
+    foreach (var element in result)
+    {
+        string originalString = element.Text;
+
+        string delimiter = "Original Key：";
+
+        int delimiterIndex = originalString.IndexOf(delimiter);
+
+        string extractedString = originalString.Substring(0, delimiterIndex);
+
+        return element.Text.Substring(extractedString.Length);
+    }
+    return "";
+}
+
+void output_txt(ref string File_name,string  play)
 {
     var code = Driver.FindElements(By.TagName("tt"));
 
@@ -78,6 +102,7 @@ void output_txt(ref string File_name)
     using (StreamWriter sw = new StreamWriter(@"codes\"+title, false,
                                     Encoding.GetEncoding("utf-8")))
     {
+        sw.WriteLine(play);
         foreach (var item in code)
         {
 
